@@ -35,6 +35,9 @@ namespace Sql2Pojo
 {
 	class MainClass
 	{
+		// TODO - move this to a configuration file or allow passing in dynamically
+		private const string	Author="Tim Stark";
+		private const string	Version="0.1";
 
 		private const string	TERMSNCONDITIONSFILE = "TermsAndConditions.txt";
 		// use 4 spaces instead of hard tabs
@@ -58,7 +61,8 @@ namespace Sql2Pojo
 			List<string> sqlFileItems = new List<string>();
 
 
-			Write2Console("Sql2Pojo v0.0.1",IMPORTANTINFO);
+			Write2Console(string.Format("Sql2Pojo v{0}",Version),IMPORTANTINFO);
+
 			if (args == null) {
 				DisplayInfo();
 			}
@@ -303,7 +307,7 @@ namespace Sql2Pojo
 			List<string> columns=new List<string>();
 			List<string> dataTypes=new List<string>();
 
-			classFile.Add(string.Format("{0}\n\n",packageName));
+
 			foreach (string rawLine in RawSqlData) {
 				string tmpLine=rawLine.Replace(HTAB, SPACE).Trim();
 				string[] temp=tmpLine.Split(SPACE);
@@ -330,7 +334,50 @@ namespace Sql2Pojo
 				}
 			}
 
-			// now write output
+			// create class header
+			classFile.Add("//****************************************************************//\n");
+			classFile.Add(string.Format("//      Class: {0}.java\n",className));
+			classFile.Add("//Description: [Add class Description Here]\n");
+			classFile.Add("//\n");
+			classFile.Add(string.Format("//     Author: {0}\n",Author));
+			classFile.Add(string.Format("// Created On: {0}\n",DateTime.Now));
+			classFile.Add("//\n");
+			classFile.Add(string.Format("// Created via Sql2Pojo v{0}\n",Version));
+			classFile.Add("//****************************************************************//\n\n");
+
+			// package name
+			classFile.Add("// package name\n");
+			classFile.Add(string.Format("{0}\n\n",packageName));
+
+			// imports
+			// TODO - should have bool to determine whether to use StringBuilder or not
+			classFile.Add("// support libraries\n");
+			classFile.Add("import java.io.Serializable;\n");
+			classFile.Add("import java.util.ArrayList;\n");
+			classFile.Add("import java.util.List;\n");
+			classFile.Add("// ToStringBuilder support library\n");
+			classFile.Add("import org.apache.commons.lang3.builder.ToStringBuilder;\n");
+
+			// TODO - should have a bool to determine whether we want Jackson integration or not
+			classFile.Add("// Jackson support libraries\n");
+			classFile.Add("import com.fasterxml.jackson.annotation.JsonIgnoreProperties;\n");
+			classFile.Add("import com.fasterxml.jackson.annotation.JsonRootName;\n");
+			classFile.Add("import com.fasterxml.jackson.annotation.JsonTypeName;\n");
+
+			classFile.Add("// XStreamAlias support library\n");
+			classFile.Add("import com.thoughtworks.xstream.annotations.XStreamAlias;\n\n");
+
+			// add Jackson decorators if integration enabled
+			classFile.Add("@JsonIgnoreProperties(ignoreUnknown=true)\n");
+			classFile.Add(string.Format("@JsonRootName(\"{0}\")\n",className));
+			classFile.Add(string.Format("@JsonTypeName(\"{0}\")\n",className));
+
+			// add XStreamAlias decorator if enabled
+			classFile.Add(string.Format("@XStreamAlias(\"{0}\")\n",className));
+
+			classFile.Add("@SuppressWarnings(\"unchecked\")\n\n");
+
+			// create class output
 			classFile.Add(
 				string.Format("public class {0} implements Serializable {{\n",
 					className));
