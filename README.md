@@ -7,6 +7,10 @@ Program Usage:
 
 sql2pojo [options] [input SQL path/file] [pojo output path] [java package name]
 
+Options:
+  -h || --h   Displays usage information and a program information message
+  -i          Ignores shema/db names for input SQL file on the CREATE TABLE line e.g. MyDB.TableName becomes TableName
+
 ToDo:
 
 1. Need to improve args parsing to be much more robust, very kludgy at the moment
